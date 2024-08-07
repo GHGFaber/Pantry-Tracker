@@ -578,7 +578,7 @@ export default function Home() {
 
                       <Stack direction="row" spacing={2}>
                         <TextField
-                          placeholder="Amount"
+                          placeholder="Add/Remove Amt"
                           fullWidth
                           onChange={(e) =>
                             handleInputChange(name, e.target.value)
@@ -686,7 +686,7 @@ export default function Home() {
                               height: "100px",
                               objectFit: "cover",
                             }}
-                            src={img}
+                            src={`data:image/png;base64,` + `${img}`}
                           />
                         </Paper>
                       ) : (
@@ -729,6 +729,7 @@ export default function Home() {
 
                       <Stack direction="row" spacing={2}>
                         <TextField
+                          placeholder="Add/Remove Amt"
                           onChange={(e) =>
                             handleInputChange(name, e.target.value)
                           }

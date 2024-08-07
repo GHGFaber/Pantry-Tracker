@@ -513,7 +513,7 @@ export default function Home() {
             <Grid padding={1} container spacing={2}>
               {searchedInv.length === 0 && searchQuery === "" ? (
                 inventory.map(({ name, quantity, img }) => (
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid key={name} item xs={12} sm={6} md={4}>
                     <Box
                       borderRadius="20px"
                       key={name}
@@ -666,7 +666,7 @@ export default function Home() {
                 </Grid>
               ) : (
                 searchedInv.map(({ name, quantity, img }) => (
-                  <Grid item xs={3} sm={6} md={4}>
+                  <Grid key={name} item xs={12} sm={6} md={4}>
                     <Box
                       borderRadius="20px"
                       key={name}

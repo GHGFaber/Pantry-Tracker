@@ -23,8 +23,6 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import MenuIcon from "@mui/icons-material/Menu";
 
-import graphPie from "./components/graphPie.js";
-
 import Grid from "@mui/material/Grid";
 
 import {

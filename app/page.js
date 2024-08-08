@@ -20,8 +20,13 @@ import {
   Input,
 } from "@mui/material";
 
+import Fab from "@mui/material/Fab";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+
 import SearchIcon from "@mui/icons-material/Search";
 import MenuIcon from "@mui/icons-material/Menu";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 import Grid from "@mui/material/Grid";
 
@@ -98,6 +103,26 @@ export default function Home() {
     setSearchedInv(reduced);
     await updateInventory();
   };
+
+  const deleteItem = async (item, array = []) => {
+    const docRef = doc(collection(firestore, "inventory"), item);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      await deleteDoc(docRef);
+    }
+    const reduced = array
+      .map((i) => {
+        if (i.name === item) {
+          i.quantity += -i.quantity;
+        }
+        return i;
+      })
+      .filter((i) => i.quantity > 0);
+
+    setSearchedInv(reduced);
+    await updateInventory();
+  };
   const addItem = async (item, num = 1, blob, array = []) => {
     console.log("dam", typeof num === "number");
     const docRef = doc(collection(firestore, "inventory"), item);
@@ -124,7 +149,7 @@ export default function Home() {
     const reduced = array
       .map((i) => {
         if (i.name === item) {
-          i.quantity += -num;
+          i.quantity += num;
         }
         return i;
       })
@@ -275,14 +300,14 @@ export default function Home() {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
-                      borderColor: "green", // Default border color
+                      borderColor: "green",
                     },
                     "&:hover fieldset": {
-                      borderColor: "darkgreen", // Hover border color
+                      borderColor: "darkgreen",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "green", // Focused border color
-                      boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)", // Custom focus ring
+                      borderColor: "green",
+                      boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)",
                     },
                   },
                 }}
@@ -296,18 +321,19 @@ export default function Home() {
                 sx={{
                   bgcolor: "green",
                   "&:hover": {
-                    bgcolor: "darkgreen", // You can choose a slightly darker shade for hover
+                    bgcolor: "darkgreen",
                   },
                   "&:active": {
-                    bgcolor: "darkgreen", // Keep the same color or make it slightly different if needed
+                    bgcolor: "darkgreen",
                   },
                   "&:focus": {
-                    bgcolor: "green", // Keep the same color for focus state
-                    boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)", // Optional: add a custom focus ring
+                    bgcolor: "green",
+                    boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)",
                   },
                 }}
                 variant="contained"
                 component="label"
+                textAlign="center"
               >
                 Image
                 <input type="file" hidden onChange={handleUpload} />
@@ -318,14 +344,14 @@ export default function Home() {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
-                      borderColor: "green", // Default border color
+                      borderColor: "green",
                     },
                     "&:hover fieldset": {
-                      borderColor: "darkgreen", // Hover border color
+                      borderColor: "darkgreen",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "green", // Focused border color
-                      boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)", // Custom focus ring
+                      borderColor: "green",
+                      boxShadow: "0 0 0 3px rgba(255,0 , 0, 0.5)",
                     },
                   },
                 }}
@@ -489,28 +515,15 @@ export default function Home() {
           </TextField>
         </Stack>
 
-        <Box border="1px solid #000">
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            width="100%"
-            bgcolor="#62a87c"
-          >
-            <Typography
-              variant="h2"
-              display="flex"
-              textAlign="center"
-              alignContent="center"
-              justifyContent="center"
-              color="#FFF"
-              sx={{ fontFamily: "monospace" }}
+        <Box>
+          <Box minWidth="1500px" maxHeight="50%">
+            <Grid
+              overflow={inventory.length > 0 ? "scroll" : "hidden"}
+              maxHeight="50vh"
+              padding={2}
+              container
+              spacing={2}
             >
-              Inventory Items
-            </Typography>
-          </Box>
-          <Box overflow="scroll" minWidth="1500px" maxHeight="50%">
-            <Grid padding={1} container spacing={2}>
               {searchedInv.length === 0 && searchQuery === "" ? (
                 inventory.map(({ name, quantity, img }) => (
                   <Grid key={name} item xs={12} sm={6} md={4}>
@@ -521,8 +534,9 @@ export default function Home() {
                       display="flex"
                       alignItems="center"
                       justifyContent="space-between"
-                      bgcolor="#f0f0f0"
+                      bgcolor="#fff8e6"
                       flexDirection="column"
+                      boxShadow="rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;"
                       padding={5}
                     >
                       {console.log(img)}
@@ -573,7 +587,7 @@ export default function Home() {
                         {name.charAt(0).toUpperCase() + name.slice(1)}
                       </Typography>
                       <Typography variant="h5" color="#333" textAlign="right">
-                        {quantity}
+                        Amount: {quantity}
                       </Typography>
 
                       <Stack direction="row" spacing={2}>
@@ -585,7 +599,8 @@ export default function Home() {
                           }
                           onBlur={(e) => handleBlur(name, e.target.value)}
                           sx={{
-                            width: "100px",
+                            backgroundColor: "white",
+                            width: "200px",
                             "& .MuiOutlinedInput-root": {
                               "& fieldset": {
                                 borderColor: "green", // Default border color
@@ -600,70 +615,119 @@ export default function Home() {
                             },
                           }}
                         ></TextField>
-                        <Button
+                        <Box
+                          direction="row"
                           sx={{
-                            bgcolor: "green",
-                            "&:hover": {
-                              bgcolor: "darkgreen", // You can choose a slightly darker shade for hover
-                            },
-                            "&:active": {
-                              bgcolor: "darkgreen", // Keep the same color or make it slightly different if needed
-                            },
-                            "&:focus": {
-                              bgcolor: "green", // Keep the same color for focus state
-                              boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)", // Optional: add a custom focus ring
-                            },
-                          }}
-                          variant="contained"
-                          onClick={() => {
-                            addItem(name, itemQuantities[name] || 1, null);
+                            "& > :not(style)": { marginRight: 1 },
+                            width: "200px",
                           }}
                         >
-                          Add
-                        </Button>
-                        <Button
-                          sx={{
-                            bgcolor: "red",
-                            "&:hover": {
-                              bgcolor: "darkred", // A slightly darker shade for hover state
-                            },
-                            "&:active": {
-                              bgcolor: "darkred", // Keep the same color or make it slightly different if needed
-                            },
-                            "&:focus": {
-                              bgcolor: "red", // Keep the same color for focus state
-                              boxShadow: "0 0 0 3px rgba(255, 0, 0, 0.5)", // Optional: add a custom focus ring
-                            },
-                          }}
-                          variant="contained"
-                          onClick={() => {
-                            removeItem(name, itemQuantities[name] || 1);
-                          }}
-                        >
-                          Remove
-                        </Button>
+                          <Fab
+                            sx={{
+                              color: "green",
+                              bgcolor: "transparent",
+                              boxShadow: "none",
+                              "&:hover": {
+                                color: "white",
+                                bgcolor: "darkgreen", // You can choose a slightly darker shade for hover
+                              },
+                              "&:active": {
+                                bgcolor: "darkgreen", // Keep the same color or make it slightly different if needed
+                              },
+                              "&:after": {
+                                color: "green",
+                                bgcolor: "transparent",
+                                boxShadow: "none",
+                              },
+                            }}
+                            aria-label="add"
+                            onClick={() => {
+                              addItem(
+                                name,
+                                itemQuantities[name] || 1,
+                                null,
+                                searchedInv
+                              );
+                            }}
+                          >
+                            <AddIcon />
+                          </Fab>
+                          <Fab
+                            sx={{
+                              color: "red",
+                              bgcolor: "transparent",
+                              boxShadow: "none",
+                              "&:hover": {
+                                color: "white",
+                                bgcolor: "darkred", // You can choose a slightly darker shade for hover
+                              },
+                              "&:active": {
+                                bgcolor: "darkred", // Keep the same color or make it slightly different if needed
+                              },
+                              "&:after": {
+                                color: "red",
+                                bgcolor: "transparent",
+                                boxShadow: "none",
+                              },
+                            }}
+                            aria-label="add"
+                            onClick={() => {
+                              removeItem(
+                                name,
+                                itemQuantities[name] || 1,
+                                searchedInv
+                              );
+                            }}
+                          >
+                            <RemoveIcon />
+                          </Fab>
+                          <Fab
+                            sx={{
+                              color: "red",
+                              bgcolor: "transparent",
+                              boxShadow: "none",
+                              "&:hover": {
+                                color: "white",
+                                bgcolor: "darkred", // You can choose a slightly darker shade for hover
+                              },
+                              "&:active": {
+                                bgcolor: "darkred", // Keep the same color or make it slightly different if needed
+                              },
+                              "&:after": {
+                                color: "red",
+                                bgcolor: "transparent",
+                                boxShadow: "none",
+                              },
+                            }}
+                            aria-label="add"
+                            onClick={() => {
+                              deleteItem(name, searchedInv);
+                            }}
+                          >
+                            <DeleteOutlineIcon />
+                          </Fab>
+                        </Box>
                       </Stack>
                     </Box>
                   </Grid>
                 ))
               ) : searchedInv.length === 0 && searchQuery !== "" ? (
-                <Grid item xs={2} sm={6} md={4}>
-                  <Box
-                    key={name}
-                    width="100%"
-                    minHeight="150px"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    bgcolor="#f0f0f0"
-                    padding={5}
-                  >
-                    <Typography variant="h3" color="#333" textAlign="center">
-                      No Items Found
-                    </Typography>
-                    <Stack direction="row" spacing={2}></Stack>
-                  </Box>
-                </Grid>
+                <Box
+                  key={name}
+                  width="100%"
+                  minHeight="150px"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  bgcolor="#f0f0f0"
+                  boxShadow="rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;"
+                  padding={5}
+                >
+                  <Typography variant="h3" color="#333" textAlign="center">
+                    No Items Found
+                  </Typography>
+                  <Stack direction="row" spacing={2}></Stack>
+                </Box>
               ) : (
                 searchedInv.map(({ name, quantity, img }) => (
                   <Grid key={name} item xs={12} sm={6} md={4}>
@@ -674,8 +738,9 @@ export default function Home() {
                       display="flex"
                       alignItems="center"
                       justifyContent="space-between"
-                      bgcolor="#f0f0f0"
+                      bgcolor="#fff8e6"
                       flexDirection="column"
+                      boxShadow="rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;"
                       padding={5}
                     >
                       {img !== "" ? (
@@ -724,7 +789,7 @@ export default function Home() {
                         {name.charAt(0).toUpperCase() + name.slice(1)}
                       </Typography>
                       <Typography variant="h5" color="#333" textAlign="right">
-                        {quantity}
+                        Amount: {quantity}
                       </Typography>
 
                       <Stack direction="row" spacing={2}>
@@ -734,58 +799,109 @@ export default function Home() {
                             handleInputChange(name, e.target.value)
                           }
                           onBlur={(e) => handleBlur(name, e.target.value)}
+                          sx={{
+                            width: "200px",
+                            "& .MuiOutlinedInput-root": {
+                              "& fieldset": {
+                                borderColor: "green", // Default border color
+                              },
+                              "&:hover fieldset": {
+                                borderColor: "darkgreen", // Hover border color
+                              },
+                              "&.Mui-focused fieldset": {
+                                borderColor: "green", // Focused border color
+                                boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)", // Custom focus ring
+                              },
+                            },
+                          }}
                         ></TextField>
-                        <Button
+
+                        <Box
+                          direction="row"
                           sx={{
-                            bgcolor: "green",
-                            "&:hover": {
-                              bgcolor: "darkgreen", // You can choose a slightly darker shade for hover
-                            },
-                            "&:active": {
-                              bgcolor: "darkgreen", // Keep the same color or make it slightly different if needed
-                            },
-                            "&:focus": {
-                              bgcolor: "green", // Keep the same color for focus state
-                              boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)", // Optional: add a custom focus ring
-                            },
-                          }}
-                          variant="contained"
-                          onClick={() => {
-                            addItem(
-                              name,
-                              itemQuantities[name] || 1,
-                              null,
-                              searchedInv
-                            );
+                            "& > :not(style)": { marginRight: 1 },
+                            width: "200px",
                           }}
                         >
-                          Add
-                        </Button>
-                        <Button
-                          sx={{
-                            bgcolor: "red",
-                            "&:hover": {
-                              bgcolor: "darkred", // A slightly darker shade for hover state
-                            },
-                            "&:active": {
-                              bgcolor: "darkred", // Keep the same color or make it slightly different if needed
-                            },
-                            "&:focus": {
-                              bgcolor: "red", // Keep the same color for focus state
-                              boxShadow: "0 0 0 3px rgba(255, 0, 0, 0.5)", // Optional: add a custom focus ring
-                            },
-                          }}
-                          variant="contained"
-                          onClick={() => {
-                            removeItem(
-                              name,
-                              itemQuantities[name] || 1,
-                              searchedInv
-                            );
-                          }}
-                        >
-                          Remove
-                        </Button>
+                          <Fab
+                            sx={{
+                              color: "white",
+                              bgcolor: "green",
+                              "&:hover": {
+                                bgcolor: "darkgreen", // You can choose a slightly darker shade for hover
+                              },
+                              "&:active": {
+                                bgcolor: "darkgreen", // Keep the same color or make it slightly different if needed
+                              },
+                              "&:focus": {
+                                bgcolor: "green", // Keep the same color for focus state
+                                boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)", // Optional: add a custom focus ring
+                              },
+                            }}
+                            aria-label="add"
+                            onClick={() => {
+                              addItem(
+                                name,
+                                itemQuantities[name] || 1,
+                                null,
+                                searchedInv
+                              );
+                            }}
+                          >
+                            <AddIcon />
+                          </Fab>
+                          <Fab
+                            sx={{
+                              color: "white",
+                              bgcolor: "red",
+                              "&:hover": {
+                                bgcolor: "darkred", // You can choose a slightly darker shade for hover
+                              },
+                              "&:active": {
+                                bgcolor: "darkred", // Keep the same color or make it slightly different if needed
+                              },
+                              "&:focus": {
+                                bgcolor: "red", // Keep the same color for focus state
+                                boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)", // Optional: add a custom focus ring
+                              },
+                            }}
+                            aria-label="add"
+                            onClick={() => {
+                              removeItem(
+                                name,
+                                itemQuantities[name] || 1,
+                                searchedInv
+                              );
+                            }}
+                          >
+                            <RemoveIcon />
+                          </Fab>
+                          <Fab
+                            sx={{
+                              color: "red",
+                              bgcolor: "transparent",
+                              "&:hover": {
+                                color: "white",
+                                bgcolor: "darkred", // You can choose a slightly darker shade for hover
+                              },
+                              "&:active": {
+                                color: "white",
+                                bgcolor: "darkred", // Keep the same color or make it slightly different if needed
+                              },
+                              "&:focus": {
+                                color: "white",
+                                bgcolor: "red", // Keep the same color for focus state
+                                boxShadow: "0 0 0 3px rgba(0, 255, 0, 0.5)", // Optional: add a custom focus ring
+                              },
+                            }}
+                            aria-label="add"
+                            onClick={() => {
+                              deleteItem(name, searchedInv);
+                            }}
+                          >
+                            <DeleteOutlineIcon />
+                          </Fab>
+                        </Box>
                       </Stack>
                     </Box>
                   </Grid>
